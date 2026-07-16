@@ -1,7 +1,22 @@
+import dns from "dns";
+
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 import { Worker } from "bullmq";
-import mongoose from "mongoose";
 import Task from "../schemas/task.js";
-const emailWorker=new Worker("emailQueue",async(job)=>{
+import sendEmail from "../services/email.js";
+import generatePdf from "../services/pdf.js";
+import sendNotifications from "../services/notification.js";
+import processImage from "../services/image.js";
+import dotenv from "dotenv";
+import connectDb from "../config/configDB.js";
+import "../config/redis.js";
+
+dotenv.config();
+
+await connectDb();//you need to connect worker also to the db
+
+console.log("Task worker started");
+const taskWorker=new Worker("taskQueue",async(job)=>{
     let task;// using this so that i dont have to do two queries in db to get the task id in try as well as catch
     try{
      task=await Task.findById(job.data.taskId);//here the worker reads whole payload from the mongo instead of from the redis
@@ -11,7 +26,12 @@ const emailWorker=new Worker("emailQueue",async(job)=>{
     }
     task.status="processing";
     await task.save();
-    await new Promise((resolve)=>setTimeout(resolve,3000));
+    console.log(`task type:${task.type} started`)
+    switch(task.type){
+        case "email":await sendEmail(task.payload);
+        break;
+        default:throw new Error("unsupported task type");
+    }
     task.status="completed";
     await task.save();}
     catch(error){
@@ -26,11 +46,11 @@ const emailWorker=new Worker("emailQueue",async(job)=>{
     port:6379
 
 }});
-emailWorker.on("completed", (job) => {
+taskWorker.on("completed", (job) => {
     console.log(`Job ${job.id} completed`);
 });
 
-emailWorker.on("failed", (job, err) => {
+taskWorker.on("failed", (job, err) => {
     console.log(`Job ${job?.id} failed`);
     console.log(err);
 });

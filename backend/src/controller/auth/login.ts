@@ -43,6 +43,12 @@ async function login(req: Request, res: Response) {
       success: true,
       message: "Login successful",
       token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+    },
     });
     return;
   } catch (error) {
@@ -53,3 +59,4 @@ async function login(req: Request, res: Response) {
     });
   }
 }
+export default login;

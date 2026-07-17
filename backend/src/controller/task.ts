@@ -2,9 +2,16 @@ import { Request, Response } from "express";
 import Task from "../schemas/task.js";
 
 import { taskQueue } from "../config/bullmq.js";
-
+const taskPriorityMap = {
+    email: 1,
+    notification: 2,
+    pdf: 3,
+    image: 4,
+} as const;
 async function taskCreate(req: Request, res: Response) {
-  const { type, payload, priority,scheduledAt } = req.body;
+  const { type, payload,scheduledAt } = req.body;
+  type TaskType = "email" | "notification" | "pdf" | "image";
+  const priority:number=taskPriorityMap[type as TaskType];
   try {
     let delay = 0;
  let scheduledDate:Date|null=null;
@@ -32,7 +39,7 @@ if (scheduledAt) {
       type,
       payload,
       status: "pending",
-      priority: priority ?? 1,
+      priority,
       retryCount: 0,
       maxRetries: 10,
       scheduledAt:scheduledDate
@@ -45,6 +52,7 @@ if (scheduledAt) {
       {
         attempts: 3,        // the no. times it will try if something fails.
         delay,
+        priority:task.priority,
         backoff:{           // w/o backoff the retries are immediate which is not ideal so we put a delay of 2s i.e. retry after 2s.
           type:"exponential",//note-this backoff is property of job but it works for worker for eg-redis adds job now worker tries to 
                              //complete the process but throws error now the retries start,the worker again tries.

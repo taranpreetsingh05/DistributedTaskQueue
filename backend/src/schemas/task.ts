@@ -7,6 +7,7 @@ interface ITask {
   priority: number;
   retryCount: number;
   maxRetries: number;
+  scheduledAt:Date | null
 }
 
 const taskSchema = new mongoose.Schema<ITask>({
@@ -40,7 +41,11 @@ const taskSchema = new mongoose.Schema<ITask>({
   maxRetries:{
     type:Number,
     default:0
-  }
+  },
+  scheduledAt: {
+    type: Date,
+    default: null,
+},
 },{timestamps:true});
 
 const Task=mongoose.model<ITask>("Task",taskSchema);

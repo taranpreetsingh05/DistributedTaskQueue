@@ -34,23 +34,20 @@ const taskWorker=new Worker("taskQueue",async(job)=>{
     }
     task.status="completed";
     await task.save();}
-    catch(error){
-        if(task){
-            task.status="failed";// we are doing this because in case the task is not completed then we have to update the status in the mongo db to failed
+    catch (error) {
+    if (task) {
+        const maxAttempts = job.opts.attempts ?? 1;// this gives max attempts we can make
+
+        if (job.attemptsMade + 1 >= maxAttempts) {//if max attempts = retries then we mark it as failed and job.attemptsMade is 0 indexed so we do +1.
+            task.status = "failed";
             await task.save();
         }
-        throw error;// throw the original error 
     }
+
+    throw error;
+}
 },{connection:{
     host:"127.0.0.1",
     port:6379
 
 }});
-taskWorker.on("completed", (job) => {
-    console.log(`Job ${job.id} completed`);
-});
-
-taskWorker.on("failed", (job, err) => {
-    console.log(`Job ${job?.id} failed`);
-    console.log(err);
-});

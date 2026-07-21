@@ -9,7 +9,6 @@ async function sendEmail(task: ITask) {
             text: string;
         };
 
-        console.log(payload);
 
         const info = await transporter.sendMail({
             from: process.env.EMAIL_USER,

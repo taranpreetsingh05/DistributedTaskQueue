@@ -9,7 +9,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "worker": "tsx watch src/workers/taskWorker.ts"
+    "emailWorker": "tsx watch src/workers/emailWorker.ts",
+     "imageWorker": "tsx watch src/workers/imageWorker.ts"
   },
   "author": "",
   "license": "ISC",
@@ -24,13 +25,16 @@
     "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.4",
+    "multer": "^2.2.0",
     "nodemailer": "^9.0.3",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.2.0",
     "@types/node": "^26.1.1",
     "@types/nodemailer": "^8.0.1",
     "tsx": "^4.23.0",

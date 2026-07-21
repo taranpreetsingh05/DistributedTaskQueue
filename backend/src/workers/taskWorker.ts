@@ -28,7 +28,7 @@ const taskWorker=new Worker("taskQueue",async(job)=>{
     await task.save();
     console.log(`task type:${task.type} started`)
     switch(task.type){
-        case "email":await sendEmail(task.payload);
+        case "email":await sendEmail(task);
         break;
         default:throw new Error("unsupported task type");
     }
